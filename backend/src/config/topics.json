@@ -1,0 +1,111 @@
+{
+  "topics": {
+    "general": {
+      "platforms": ["x", "linkedin", "facebook"],
+      "rules": {
+        "x": {
+          "tone": "conversational, thought-provoking",
+          "format": "1-3 sentences, engaging and quotable",
+          "style": "direct, authentic, sparks discussion"
+        },
+        "linkedin": {
+          "tone": "professional but approachable",
+          "format": "opening hook + 2-3 short paragraphs + call to action",
+          "style": "insightful, adds value, encourages engagement"
+        },
+        "facebook": {
+          "tone": "friendly, relatable",
+          "format": "conversational paragraphs with personality",
+          "style": "engaging, encourages comments and shares"
+        }
+      }
+    },
+    "tech": {
+      "platforms": ["x", "linkedin", "facebook"],
+      "rules": {
+        "x": {
+          "tone": "concise, opinionated",
+          "format": "1–2 sentences, max 280 chars",
+          "style": "punchy, thought-provoking"
+        },
+        "linkedin": {
+          "tone": "professional, reflective",
+          "format": "hook + short paragraphs + clear takeaway",
+          "style": "educational, insightful"
+        },
+        "facebook": {
+          "tone": "neutral, story-like",
+          "format": "short paragraph, slightly casual",
+          "style": "relatable, conversational"
+        }
+      }
+    },
+    "politics": {
+      "platforms": ["x", "facebook"],
+      "rules": {
+        "x": {
+          "tone": "sharp, analytical",
+          "format": "1–3 sentences, opinionated",
+          "style": "bold, clear stance"
+        },
+        "facebook": {
+          "tone": "emotional, casual",
+          "format": "paragraph, story-like",
+          "style": "personal perspective, engaging"
+        }
+      }
+    },
+    "football": {
+      "platforms": ["facebook"],
+      "rules": {
+        "facebook": {
+          "tone": "casual, fan-like",
+          "format": "paragraph, story-like, expressive",
+          "style": "passionate, enthusiastic"
+        }
+      }
+    },
+    "business": {
+      "platforms": ["linkedin", "x", "facebook"],
+      "rules": {
+        "linkedin": {
+          "tone": "authoritative, insightful",
+          "format": "hook + key points + conclusion",
+          "style": "professional, value-driven"
+        },
+        "x": {
+          "tone": "strategic, concise",
+          "format": "1–2 sentences, impactful",
+          "style": "actionable, thought-leadership"
+        },
+        "facebook": {
+          "tone": "approachable, informative",
+          "format": "short paragraphs, conversational",
+          "style": "helpful, relatable"
+        }
+      }
+    },
+    "lifestyle": {
+      "platforms": ["facebook", "linkedin"],
+      "rules": {
+        "facebook": {
+          "tone": "warm, personal",
+          "format": "story-based, 2-3 paragraphs",
+          "style": "inspirational, authentic"
+        },
+        "linkedin": {
+          "tone": "reflective, professional",
+          "format": "personal story + professional insight",
+          "style": "balanced, thoughtful"
+        }
+      }
+    }
+  },
+  "keywords": {
+    "tech": ["software", "code", "AI", "machine learning", "programming", "developer", "technology", "data", "cloud", "algorithm", "API", "startup", "SaaS", "app", "digital", "cyber", "computer"],
+    "politics": ["government", "policy", "election", "democracy", "legislation", "vote", "campaign", "congress", "senate", "president", "minister", "parliament", "political"],
+    "football": ["goal", "match", "team", "player", "league", "championship", "soccer", "striker", "midfielder", "defender", "coach", "football", "united", "city", "arsenal", "chelsea", "liverpool", "win", "beat", "score", "fulham", "premier"],
+    "business": ["revenue", "profit", "strategy", "market", "growth", "investment", "entrepreneur", "startup", "CEO", "sales", "ROI", "business", "company", "finance"],
+    "lifestyle": ["health", "wellness", "balance", "mindfulness", "habits", "personal growth", "fitness", "productivity", "self-care", "lifestyle"]
+  }
+}
