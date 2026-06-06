@@ -1,3 +1,5 @@
+/// <reference types="vite/client" />
+
 /**
  * API Service
  * Handles all communication with the backend API
@@ -8,16 +10,14 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
 export interface GenerateRequest {
   idea: string;
   topic?: string;
+  history?: Array<{ role: 'user' | 'assistant'; content: string }>;
 }
 
 export interface GenerateResponse {
   topic: string;
   topicConfidence?: number;
-  posts: {
-    x: string | null;
-    linkedin: string | null;
-    facebook: string | null;
-  };
+  content: string; // Comprehensive intelligent content
+  contentType: 'answer' | 'article' | 'guide' | 'explanation' | 'creative'; // Type of content generated
 }
 
 export interface TopicConfig {
@@ -40,9 +40,9 @@ export interface TopicsResponse {
 
 class ApiService {
   /**
-   * Generate posts from an idea
+   * Generate intelligent content from an idea
    */
-  async generatePosts(request: GenerateRequest): Promise<GenerateResponse> {
+  async generate(request: GenerateRequest): Promise<GenerateResponse> {
     const response = await fetch(`${API_BASE_URL}/generate`, {
       method: 'POST',
       headers: {
@@ -53,10 +53,17 @@ class ApiService {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.message || 'Failed to generate posts');
+      throw new Error(error.message || 'Failed to generate content');
     }
 
     return response.json();
+  }
+
+  /**
+   * Generate posts from an idea (deprecated - use generate instead)
+   */
+  async generatePosts(request: GenerateRequest): Promise<GenerateResponse> {
+    return this.generate(request);
   }
 
   /**

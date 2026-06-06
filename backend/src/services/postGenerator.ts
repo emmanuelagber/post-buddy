@@ -8,20 +8,18 @@ import { configManager } from '../config/configManager';
  */
 export interface GenerateRequest {
   idea: string;
-  topic?: string; // Optional - auto-detect if not provided
+  topic?: string;
+  history?: Array<{ role: 'user' | 'assistant'; content: string }>;
 }
 
 /**
- * Post generation response
+ * Post generation response - now returns intelligent content
  */
 export interface GenerateResponse {
   topic: string;
   topicConfidence?: number;
-  posts: {
-    x: string | null;
-    linkedin: string | null;
-    facebook: string | null;
-  };
+  content: string; // Single, comprehensive intelligent content
+  contentType: 'answer' | 'article' | 'guide' | 'explanation' | 'creative'; // Type of content generated
 }
 
 /**
@@ -30,7 +28,7 @@ export interface GenerateResponse {
  */
 class PostGenerator {
   /**
-   * Generate posts for all allowed platforms
+   * Generate intelligent content from idea (single API call)
    */
   public async generate(request: GenerateRequest): Promise<GenerateResponse> {
     // 1️⃣ Determine topic (use provided or auto-detect)
@@ -38,7 +36,7 @@ class PostGenerator {
     let topicConfidence: number | undefined;
 
     if (!topic) {
-      topic = topicDetector.detectTopic(request.idea);
+      topic = await topicDetector.detectTopic(request.idea);
       topicConfidence = topicDetector.getConfidenceScore(request.idea, topic);
       console.log(`Auto-detected topic: ${topic} (confidence: ${topicConfidence}%)`);
     } else {
@@ -51,76 +49,67 @@ class PostGenerator {
       }
     }
 
-    // 2️⃣ Get allowed platforms for this topic
-    const allowedPlatforms = configManager.getAllowedPlatforms(topic);
-    console.log(`Allowed platforms for "${topic}":`, allowedPlatforms);
+    // 2️⃣ Build intelligent prompt (single API call instead of multiple platforms)
+    const prompt = promptBuilder.buildIntelligentPrompt(request.idea, topic, request.history);
+    console.log(`Generated intelligent prompt for topic: "${topic}"`);
 
-    // 3️⃣ Build prompts dynamically for allowed platforms
-    const prompts: Record<string, string> = {};
-    for (const platform of allowedPlatforms) {
-      const prompt = promptBuilder.buildPrompt(request.idea, topic, platform);
-      if (prompt) prompts[platform] = prompt;
-    }
-
-    // 4️⃣ Generate posts concurrently
-    const posts: Record<string, string | null> = { x: null, linkedin: null, facebook: null };
-
-    const generationPromises = Object.entries(prompts).map(async ([platform, prompt]) => {
-      try {
-        const generatedPost = await llmService.generate(prompt);
-        posts[platform] = generatedPost;
-        console.log(`✓ Generated post for ${platform}`);
-      } catch (error) {
-        console.error(`❌ Failed to generate post for ${platform}:`, error);
-        posts[platform] = null;
-      }
-    });
-
-    await Promise.all(generationPromises);
-
-    // 5️⃣ Return structured response
-    const response: GenerateResponse = {
-      topic,
-      posts: {
-        x: posts.x || null,
-        linkedin: posts.linkedin || null,
-        facebook: posts.facebook || null
-      }
-    };
-
-    if (topicConfidence !== undefined) {
-      response.topicConfidence = topicConfidence;
-    }
-
-    return response;
-  }
-
-  /**
-   * Generate post for a single platform
-   */
-  public async generateSingle(
-    idea: string,
-    topic: string,
-    platform: string
-  ): Promise<string> {
-    // Validate platform
-    if (!configManager.isPlatformAllowed(topic, platform)) {
-      throw new Error(`Platform "${platform}" is not allowed for topic "${topic}"`);
-    }
-
-    // Build prompt
-    const prompt = promptBuilder.buildPrompt(idea, topic, platform);
-    if (!prompt) throw new Error(`Failed to build prompt for ${platform}`);
-
-    // Generate post via LLMService
+    // 3️⃣ Generate content (SINGLE API CALL - this fixes the rate limit issue)
     try {
-      const post = await llmService.generate(prompt);
-      return post;
+      const generatedContent = await llmService.generate(prompt);
+      console.log(`✓ Successfully generated intelligent content`);
+
+      // 4️⃣ Determine content type based on the request
+      const contentType = this.detectContentType(request.idea, generatedContent);
+
+      // 5️⃣ Return structured response
+      const response: GenerateResponse = {
+        topic,
+        content: generatedContent,
+        contentType
+      };
+
+      if (topicConfidence !== undefined) {
+        response.topicConfidence = topicConfidence;
+      }
+
+      return response;
     } catch (error) {
-      console.error(`❌ Failed to generate post for ${platform}:`, error);
+      console.error(`❌ Failed to generate content:`, error);
       throw error;
     }
   }
+
+  /**
+   * Detect content type based on the idea and generated content
+   */
+  private detectContentType(idea: string, content: string): 'answer' | 'article' | 'guide' | 'explanation' | 'creative' {
+    const lowerIdea = idea.toLowerCase();
+    
+    // Check for question marks
+    if (lowerIdea.includes('?') || lowerIdea.includes('how') || lowerIdea.includes('what') || 
+        lowerIdea.includes('why') || lowerIdea.includes('explain')) {
+      return 'answer';
+    }
+    
+    // Check for how-to/guide indicators
+    if (lowerIdea.includes('how to') || lowerIdea.includes('tutorial') || lowerIdea.includes('guide')) {
+      return 'guide';
+    }
+    
+    // Check for explanation indicators
+    if (lowerIdea.includes('explain') || lowerIdea.includes('understand')) {
+      return 'explanation';
+    }
+    
+    // Check for article indicators
+    if (lowerIdea.includes('about') || lowerIdea.includes('discuss') || lowerIdea.includes('article')) {
+      return 'article';
+    }
+    
+    // Default to creative/general content
+    return 'creative';
+  }
+
 }
 
 // Singleton instance for use throughout the app

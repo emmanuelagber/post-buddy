@@ -9,7 +9,7 @@ import { LLMAdapter } from './llmAdapterInterface';
 class GeminiAdapter implements LLMAdapter {
   private genAI: GoogleGenerativeAI | null = null;
   private model: any = null;
-  private modelName = 'gemini-2.0-flash';
+  private modelName = 'gemini-2.5-flash';
   private apiKey = process.env.GEMINI_API_KEY;
 
   constructor() {
@@ -41,7 +41,19 @@ class GeminiAdapter implements LLMAdapter {
       return text.trim();
     } catch (error: any) {
       console.error('Gemini generation error:', error);
-      throw new Error(`LLM generation failed: ${error.message}`);
+      
+      // Provide user-friendly error messages
+      if (error.message?.includes('429') || error.message?.includes('quota') || error.message?.includes('Quota exceeded')) {
+        throw new Error('The AI service is currently at its usage limit. Please try again in a few moments.');
+      } else if (error.message?.includes('401') || error.message?.includes('unauthorized')) {
+        throw new Error('The API key is invalid or has expired. Please check your configuration.');
+      } else if (error.message?.includes('403') || error.message?.includes('permission')) {
+        throw new Error('You don\'t have permission to use the AI service. Please check your API credentials.');
+      } else if (error.message?.includes('timeout') || error.message?.includes('connection')) {
+        throw new Error('The connection to the AI service timed out. Please try again.');
+      } else {
+        throw new Error('Unable to generate content. Please try again later.');
+      }
     }
   }
 }

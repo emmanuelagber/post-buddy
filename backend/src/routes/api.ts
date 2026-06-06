@@ -6,11 +6,11 @@ const router = Router();
 
 /**
  * POST /api/generate
- * Generate social media posts from an idea
+ * Generate intelligent content from an idea
  * 
  * Request body:
  * {
- *   "idea": "Your idea text",
+ *   "idea": "Your question, topic, or request",
  *   "topic": "tech" (optional - will auto-detect if not provided)
  * }
  * 
@@ -18,11 +18,8 @@ const router = Router();
  * {
  *   "topic": "tech",
  *   "topicConfidence": 85,
- *   "posts": {
- *     "x": "Generated X post...",
- *     "linkedin": "Generated LinkedIn post...",
- *     "facebook": "Generated Facebook post..."
- *   }
+ *   "content": "Comprehensive, intelligent response...",
+ *   "contentType": "answer|article|guide|explanation|creative"
  * }
  */
 router.post('/generate', async (req: Request, res: Response) => {
@@ -50,7 +47,7 @@ router.post('/generate', async (req: Request, res: Response) => {
       topic: topic?.trim()
     };
 
-    // Generate posts
+    // Generate content (single API call - fixes rate limit issue)
     const response = await postGenerator.generate(request);
 
     // Return response
